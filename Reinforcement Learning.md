@@ -116,7 +116,7 @@
 - 上图是Actor更新参数部分，前半部分grad[Q]是从Critic来的，就是Critic告诉Actor，要怎么移动，才能最大Q。
 - 后面部分grad[μ]是从Actor来的，Actor要修改自身参数，最大化Q。
 
-![](https://morvanzhou.github.io/static/results/rl/6-2-1.png）
+![](https://morvanzhou.github.io/static/results/rl/6-2-1.png)
 
 - 上图是Critic参数更新部分，借鉴了DQN和Double DQN的方式，有两个计算Q的神经网络。
 - Q_target中依据下一状态，用Actor来选择动作，而这时的Actor也是一个Actor_target（有着很久以前的参数），使用这种方法获得的Q_target能像DQN那样切断相关性，提高收敛性。
