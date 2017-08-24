@@ -2,7 +2,7 @@
 
 #------------------------------------------------------------------------------------------------
 ### <center>tabular Q learning</center>
-<center>![](https://morvanzhou.github.io/static/results/rl/2-1-1.png)</center>
+![](https://morvanzhou.github.io/static/results/rl/2-1-1.png)
 
 - 所有的Q values(行为值)放在q_table中，更新q_table也是在更新机器人的行为准则
 - q_table的index是所有对应的state（机器人位置）
@@ -14,14 +14,14 @@
 
 #------------------------------------------------------------------------------------------------
 ### <center>Sarsa</center>
-<center>![](https://morvanzhou.github.io/static/results/rl/3-1-1.png)</center>
+![](https://morvanzhou.github.io/static/results/rl/3-1-1.png)
 
 - 他在当前 state 已经想好了 state 对应的 action, 而且想好了 下一个 state_ 和下一个 action_ (Qlearning 还没有想好下一个 action_)
 - 更新 Q(s,a) 的时候基于的是下一个 Q(s_, a_) (Qlearning 是基于 maxQ(s_))
 
 #------------------------------------------------------------------------------------------------
 ### <center>Sarsa-lambda</center>
-<center>![](https://morvanzhou.github.io/static/results/rl/3-3-1.png)</center>
+![](https://morvanzhou.github.io/static/results/rl/3-3-1.png)
 
 - Q-Learning和Sarsa都只更新获取到reward的前一步，而Sarsa-lambda就是更新获取到reward的前lambda步，lambda取值[0,1]之间。
 - 如果 lambda = 0, Sarsa-lambda 就是 Sarsa, 只更新获取到 reward 前经历的最后一步.
@@ -29,7 +29,7 @@
 
 #------------------------------------------------------------------------------------------------
 ### <center>Deep Q Network</center>
-<center>![](https://morvanzhou.github.io/static/results/rl/4-1-1.JPG)</center>
+![](https://morvanzhou.github.io/static/results/rl/4-1-1.JPG)
 
 - 记忆库 (用于重复学习)
 - 神经网络计算 Q 值
@@ -40,7 +40,7 @@
 
 #------------------------------------------------------------------------------------------------
 ### <center>Double DQN</center>
-<center>![](https://morvanzhou.github.io/static/results/rl/4-5-2.png)</center>
+![](https://morvanzhou.github.io/static/results/rl/4-5-2.png)
 
 - DQN基于Q-Learning，Qmax会导致Q现实当中的过估计(overestimate)，Double DQN为解决这一问题。
 - 有两个神经网络: Q_eval (Q估计中的), Q_next (Q现实中的).
@@ -50,7 +50,7 @@
 
 #------------------------------------------------------------------------------------------------
 ### <center>Prioritized Experience Replay (DQN)</center>
-<center>![](https://morvanzhou.github.io/static/results/rl/4-6-1.png)</center>
+![](https://morvanzhou.github.io/static/results/rl/4-6-1.png)
 
 - batch抽样的时候并不是随机抽样，而是按照Memory中的样本优先级来抽。
 - TD-error，也就是Q现实-Q估计来规定优先学习的程度。
@@ -59,9 +59,9 @@
 
 #------------------------------------------------------------------------------------------------
 ### <center>Dueling DQN</center>
-<center>![](https://morvanzhou.github.io/static/results/rl/4-7-2.png)</center>
+![](https://morvanzhou.github.io/static/results/rl/4-7-2.png)
 
-<center>![](https://morvanzhou.github.io/static/results/rl/4-7-4.png)</center>
+![](https://morvanzhou.github.io/static/results/rl/4-7-4.png)
 
 - 将每个动作的Q拆分成state的Value加上每个动作的Advantage。
 - DQN神经网络直接输出的是每种动作的Q值，而Dueling DQN每个动作的Q值是两部分组成。
@@ -69,7 +69,7 @@
 
 #------------------------------------------------------------------------------------------------
 ### <center>Policy Gradients</center>
-<center>![](https://morvanzhou.github.io/static/results/rl/5-1-1.png)</center>
+![](https://morvanzhou.github.io/static/results/rl/5-1-1.png)
 
 - 不同于Q-Learning和Sarsa，接收环境信息（observation），选择action，得到最大的value。policy gradient跳过了value这个阶段，直接输出所有动作的概率分布。
 - 上图是基于整条回合数据的更新，也叫REINFORCE方法。
@@ -78,7 +78,7 @@
 
 #------------------------------------------------------------------------------------------------
 ### <center>Actor Critic</center>
-<center>![](https://morvanzhou.github.io/static/results/rl/6-1-1.png)</center>
+![](https://morvanzhou.github.io/static/results/rl/6-1-1.png)
 
 - 结合了 Policy Gradient (Actor) 和 Function Approximation (Critic) 的方法. Actor 基于概率选行为, Critic 基于 Actor 的行为评判行为的得分, Actor 根据 Critic 的评分修改选行为的概率.
 
@@ -111,19 +111,19 @@
 
 #------------------------------------------------------------------------------------------------
 ### <center>Deep Deterministic Policy Gradient (DDPG)</center>
-<center>![](https://morvanzhou.github.io/static/results/rl/6-2-0.png)</center>
+![](https://morvanzhou.github.io/static/results/rl/6-2-0.png)
 
 - 上图是Actor更新参数部分，前半部分grad[Q]是从Critic来的，就是Critic告诉Actor，要怎么移动，才能最大Q。
 - 后面部分grad[μ]是从Actor来的，Actor要修改自身参数，最大化Q。
 
-<center>![](https://morvanzhou.github.io/static/results/rl/6-2-1.png)</center>
+![](https://morvanzhou.github.io/static/results/rl/6-2-1.png）
 
 - 上图是Critic参数更新部分，借鉴了DQN和Double DQN的方式，有两个计算Q的神经网络。
 - Q_target中依据下一状态，用Actor来选择动作，而这时的Actor也是一个Actor_target（有着很久以前的参数），使用这种方法获得的Q_target能像DQN那样切断相关性，提高收敛性。
 
 #------------------------------------------------------------------------------------------------
 ##### <center> DDPG神经网络图</center>
-<center>![](https://morvanzhou.github.io/static/results/rl/6-2-2.png)</center>
+![](https://morvanzhou.github.io/static/results/rl/6-2-2.png)
 
 - 使用Actor Critic的结构，但输出的不是行为的概率，而是具体的行为，用于连续动作（continuous action）的预测，DDPG结合了DQN结构，提高了Actor Critic的稳定性和收敛性。
 
@@ -171,7 +171,7 @@
 
 #------------------------------------------------------------------------------------------------
 ### <center>Asynchronous Advantage Actor-Critic (A3C)</center>
-<center>![](https://morvanzhou.github.io/static/results/rl/6-3-1.png)</center>
+![](https://morvanzhou.github.io/static/results/rl/6-3-1.png)
 
 A3C的算法实际上就是将Actor-Critic放在了多个线程中进行同步训练，多个Worker工作，然后将学到的经验同步共享到一个中央大脑。中央大脑最怕一个人的连续性更新，比如DQN使用记忆库来更新，打乱了经历间的相关性，如果中央大脑只有一个人在更新，所有的经历都是相关的，如果有多个Worker一起更新，更新用的经历是不相关的，达到了和DQN一样的目的。
 
