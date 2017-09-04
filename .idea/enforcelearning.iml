@@ -2,8 +2,17 @@
 <module type="PYTHON_MODULE" version="4">
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$" />
-    <orderEntry type="jdk" jdkName="Python 3.5.2 (C:\Users\DELL\AppData\Local\Programs\Python\Python35\python.exe)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.6.1 (D:\ProgramData\Anaconda3\python.exe)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="EvolutionaryAlgorithm" />
+    <orderEntry type="module" module-name="Keras" />
+    <orderEntry type="module" module-name="matplotlib" />
+    <orderEntry type="module" module-name="ScikitLearn" />
+    <orderEntry type="module" module-name="mygame" />
+    <orderEntry type="module" module-name="pyglettutorial" />
+    <orderEntry type="module" module-name="FindAndFireDrone" />
+    <orderEntry type="module" module-name="Keras-FlappyBird" />
+    <orderEntry type="module" module-name="tensorflowDemo" />
   </component>
   <component name="TestRunnerService">
     <option name="projectConfiguration" value="Nosetests" />

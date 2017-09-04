@@ -7,13 +7,12 @@ def update():
         observation = env.reset()
         while True:
             # fresh env
-            env.render()
+            # env.render()
 
             # RL choose action based on observation
             action = RL.choose_action(str(observation))
-
             # RL take action and get next observation and reward
-            observation_,reward,done = env.step(action)
+            observation_,reward,done = env.step(action,observation)
 
             # RL learn from this transition
             RL.learn(str(observation),action,reward,str(observation_))

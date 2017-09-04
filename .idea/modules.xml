@@ -2,7 +2,16 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../EvolutionaryAlgorithm/.idea/EvolutionaryAlgorithm.iml" filepath="$PROJECT_DIR$/../EvolutionaryAlgorithm/.idea/EvolutionaryAlgorithm.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../FindAndFireDrone/.idea/FindAndFireDrone.iml" filepath="$PROJECT_DIR$/../FindAndFireDrone/.idea/FindAndFireDrone.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../Keras/.idea/Keras.iml" filepath="$PROJECT_DIR$/../Keras/.idea/Keras.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../Keras-FlappyBird/.idea/Keras-FlappyBird.iml" filepath="$PROJECT_DIR$/../Keras-FlappyBird/.idea/Keras-FlappyBird.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../ScikitLearn/.idea/ScikitLearn.iml" filepath="$PROJECT_DIR$/../ScikitLearn/.idea/ScikitLearn.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/enforcelearning.iml" filepath="$PROJECT_DIR$/.idea/enforcelearning.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../matplotlib/.idea/matplotlib.iml" filepath="$PROJECT_DIR$/../matplotlib/.idea/matplotlib.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../mygame/.idea/mygame.iml" filepath="$PROJECT_DIR$/../mygame/.idea/mygame.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../pyglettutorial/.idea/pyglettutorial.iml" filepath="$PROJECT_DIR$/../pyglettutorial/.idea/pyglettutorial.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../tensorflowDemo/.idea/tensorflowDemo.iml" filepath="$PROJECT_DIR$/../tensorflowDemo/.idea/tensorflowDemo.iml" />
     </modules>
   </component>
 </project>

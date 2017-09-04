@@ -241,12 +241,83 @@ A3C的算法实际上就是将Actor-Critic放在了多个线程中进行同步�
 	- 第六步，更新环境，进行下一轮学习
 		
 		
-		
+
+# --------------------------------------------------------------------
+### <center>Distributed Proximal Policy Optimization(DPPO)</center>
+![](https://morvanzhou.github.io/static/results/rl/6-4-2.png)
 	
+解决Policy Gradient不好确定Learning rate（或者step size）的问题，因为如果step size过大，学出来的policy会一直乱动，不会收敛，但如果step size太小，对于完成训练，我们会等到绝望。PPO利用new Policy和old Policy的比例，限制了new Policy的更新幅度，让Policy Gradient对稍微大点的step size不那么敏感。
+
+PPO是基于Actor-Critic算法，Actor想最大化J_PPO，Critic想最小化L_BL，Critic的loss好说，就是减少TD error，而Actor的就是在old Policy上根据Advantage（TD error）修改new Policy，advantage大的时候，修改幅度大，让new Policy更可能发生，而且附加一个KL Penalty（惩罚项），如果new Polic和old Policy差太多，那么KL divergence就越大，通俗来说，这个优势能能让新的策略大幅度修改，但也不要过头，这样会导致矫枉过正以致一条道走到黑，也就是保守主义的思想，不要让new Policy比old Policy差太多，如果差太多，相当于用了一个大的Learning rate，比较难收敛。
+
+![](https://morvanzhou.github.io/static/results/rl/6-4-3.png)
+
+pi是Actor，PPO更新Actor和Critic的时候，将pi的参数复制给oldpi，就是上面那个update_oldpi这个operation做的事情，Actor使用normal distribution正太分布输出动作。
+更新Critic的时候，根据计算出来的discounted_r和自己神经网络分析出来的state value之间的差（advantage），然后最小化这个差值。
+discounted_r是一个episode不断step积累下来的reward
+更新Actor的时候，有两种方式，一种是KL penalty来更新，
+
+![](https://morvanzhou.github.io/static/results/rl/6-4-4.png)
+
+还有一种是clipped surrogate objective，就是限制new Policy的变化幅度，和KL penalty的规则差不多。
+![](https://morvanzhou.github.io/static/results/rl/6-4-6.png)
+
+	for ep in range(EP_MAX):
+    s = env.reset()
+    buffer_s, buffer_a, buffer_r = [], [], []
+    ep_r = 0
+    for t in range(EP_LEN):    # in one episode
+        env.render()
+        a = ppo.choose_action(s)
+        s_, r, done, _ = env.step(a)
+        buffer_s.append(s)
+        buffer_a.append(a)
+        buffer_r.append((r+8)/8)    # normalize reward, find to be useful
+        s = s_
+        ep_r += r
+
+        # update ppo
+        if (t+1) % BATCH == 0 or t == EP_LEN-1:
+            v_s_ = ppo.get_v(s_)
+            discounted_r = []
+            for r in buffer_r[::-1]:
+                v_s_ = r + GAMMA * v_s_
+                discounted_r.append(v_s_)
+            discounted_r.reverse()
+
+            bs, ba, br = np.vstack(buffer_s), np.vstack(buffer_a), np.array(discounted_r)[:, np.newaxis]
+            buffer_s, buffer_a, buffer_r = [], [], []
+            ppo.update(bs, ba, br)
 
 
+- 上面是PPO的主循环代码，第一步，初始化环境得到s
+- 第二步，ppo的Actor根据s选择动作a，Actor使用normal distribution正太分布输出动作。
+- 第三步，环境根据a更新得到s_,r,以及是否结束done
+- 第四步，将s_,r,a加入到buffer，
+- 第五步，如果到了需要更新ppo的步骤，更新ppo
+
+	- 从s_，Critic获得价值v_s_
+	- 将buffer中的r都加上一个GAMMA*v_s_得到一个discounted_r的列表
+	- 用缓存中的s，a，以及上面的discounted_r用于ppo的更新
+
+		- Actor，update_oldpi 就是不断将oldpi里的参数更新pi中的
+		- Critic，输入s和r得到advantage， self.advantage = self.tfdc_r - self.v
+		- atrain，就是最小化aloss，self.aloss = -(tf.reduce_mean(surr - self.tflam * kl))，需要求一个surr和一个惩罚项kl
+		surr = ratio*self.tfadv  ,tfadv是Actor的advatange
+		ratio = pi.prob(self.tfa)/oldpi.prob(self.tfa)  ，tfa是Actor的action
+		- ctrain,update Critic,输入s和r，就是最小化closs， self.closs = tf.reduce_mean(tf.square(self.advantage))
+		 self.advantage = self.tfdc_r - self.v  ，tfdc_r是Critic的discounted_r，v是Critic的神经网络根据s和a得到的价值
 
 
+DPPO就是借鉴A3C的并行方法，将PPO各个on-policy学习到的经验分享到Global PPO。
+
+	- 用OpenAI提出的Clipped Surrogate Objective
+	- 使用多个线程（workers）平行在不同的环境中收集数据
+	- workers共享一个Global PPO
+	- workers不会自己算PPO的gradients，不会像A3C那样推送Gradients给Global net
+	- workers只推送自己采集的数据给Global PPO
+	- Global PPO拿到多个workers一定批量的数据后进行更新（更新时worker停止采集）
+	- 更新完后，workers用最新的Policy采集数据
 
 
 
