@@ -1,12 +1,102 @@
 # <center>Enforcement learning</center>
 
+## 强化学习的术语和数学符号
+#### 符号
+- agent  学习者，决策者
+- enviroment  环境
+- s/state  状态，表示环境的数据
+- S  所有状态的集合
+- a/action  决策者的动作
+- A  所有行动的集合
+- A(s) 状态s的行动集合
+- r/reward agent在一个action之后，获得的奖赏
+- R  所有奖赏集合
+- St 第t步的状态
+- At 第t步的行动
+- Rt 第t步的奖赏
+- Gt 第t步的长期回报，也是强化学习的目标1，最求最大长期回报
+
+
+- π 策略policy，策略规定了状态s时，应该选择动作a，强化学习的目标2，找到最优策略
+- π(s) 策略π在状态s下，选择的行动
+- π* 最优策略optimal policy
+- r(s,a) 在状态s下，选择行动a的奖赏
+- r(s,a,s') 在状态s下，选择行动a，变成状态s'的奖赏
+- p(s'|s,a) 在状态s，选择行动a的前提下，变成状态s'的概率
+- vπ(s) 状态价值，使用策略π，状态s下的长期奖赏Gt
+- qπ(s,a) 行动价值，使用策略π，状态s，选择行动a下的长期奖赏Gt
+- v*(s)  最佳状态价值
+- q*(s,a) 最佳行动价值  强化学习的目标3：找到最优价值函数或者最佳行动价值函数
+- V(s) vπ(s)的集合
+- Q(s,a) qπ(s,a)的集合
+
+- v^(St,θt)  最优近似状态价值函数
+- q^(St,At,θt)  最优近似行动价值函数  强化学习的目标4：找到最优近似状态价值函数或者最优近似行动价值函数
+
+- θ 近似价值函数的权重向量   强化学习的目标5：找到求解θ
+- φ(s) 近似状态价值函数的特征函数，是一个将状态s转化成计算向量的方法，其和θ组成近似状态价值函数
+
+		v^ ≈ transpose(θ)φ(s)
+
+-  φ(s,a) 近似行动价值函数的特征函数，是一个将状态s，行动a转化成计算向量的方法，其和θ组成近似行动价值函数
+
+		v^ ≈ transpose(θ)φ(s,a)
+
+- et  第t步的有效跟踪向量(eligibility trace rate),可理解为近似价值函数微分的优化值。
+
+		e0 ≈ 0
+		et ≈ ▽v^(St,θt) + γλet-1
+		θt ≈ θt + αδtet
+
+- α  学习步长 α∈(0,1]
+- γ 未来回报的折扣率（discount rate）γ∈[0,1]
+- λ λ-return 中的比例参数 λ∈[0,1]
+- h horizon,水平线h表示on-line当时可以模拟的数据步骤。 t<h≤T
+- ε 在ε-greedy策略中，采用随机行动的概率 ε∈[0,1)
+
+#### 术语
+- episodic tasks  情节性任务，指会在有限步骤下结束
+- continuing tasks 连续性任务，指有无限步骤
+- episode 情节，指从起始状态（或者当前状态）到结束的所有步骤
+- tabular method 列表方法，指使用了数组或者表格存储每个状态（或者状态-行动）的信息（比如：其价值）
+- approximation methods 近似方法，指用一个函数来计算状态（或者状态-行动）的价值
+- model  环境的模型，可以模拟环境，模拟行动的结果 Dynamic Programming need a model
+- model-based methods 基于模型的方法，通过模型来模拟，可以模拟行动，获得状态或者行动的价值
+- model-free methods 无模型的方法，使用试错法（trial-and-error）来获得（状态或者行动）价值
+- bootstarpping 引导性 （状态或者行动）价值是根据其他的（状态或者行动）价值计算得到的
+- sampling 取样性  （状态或者行动）价值，或者部分值（比如：奖赏）是取样得到的。引导性和取样性并不是对立的，可以是取样的，并且是引导性的
+- planning method 计划性方法，需要一个模型，在模型里，可以获得状态价值，比如：动态规划
+- learning method 学习性方法，不需要模型，通过模拟（或者体验），来计算状态价值，比如：蒙特卡洛方法，时序差分方法
+- on-policy method  on-policy方法，评估的策略和优化的策略是同一个
+- off-policy method off-policy方法，评估的策略和优化的策略不是同一个，意味着优化策略使用来自外部的样本数据
+- predication algorithms 预测算法，计算每个状态的价值v(s),然后预测能得到最大回报的最优行动。
+- control algorithms 控制算法，计算每个状态下每个行动的价值q(s,a)
+- target policy 目标策略π，off-policy方法中需要优化的策略
+- behavior policy 行为策略μ，off-policy方法中提供样本数据的策略
+- importance sampling 行为策略μ的样本数据
+- importance sampling rate 由于目标策略π和行为策略μ不同，导致样本数据在使用上的加权值
+- ordinary importance sampling 无偏见的计算策略价值的方法
+- weighted importance sampling 有偏见的计算策略价值的方法
+- MSE(mean square error) 平均平法误差
+- MDP(markov decision process) 马尔科夫决策过程
+- the forward view 通过往前看，直到将来，根据其回报和状态来更新每一步的状态，
+- the backward or mechanistic view  根据current TD error集合上过往的有效跟踪(eligibility traces)来更新当下的有效跟踪
+		
+		e0 ≈ 0
+		et ≈ ▽v^(St,θt) + γλet-1
+
 ## 强化学习分类和基本组成
 
-	在第t步agent的工作流程是执行一个动作At，获得该动作之后的环境观测状况Qt，以及获得这个动作的反馈奖赏Rt。然后不断累积反馈奖赏且最大化。
+- 如果有一个模型，可以获得价值函数v(s)或者q(s,a)的值---> 动态规划方法
+- 如果可以模拟一个完整的episode ---> 蒙特卡洛方法
+- 如果需要在模拟一个episode中间就要学习策略 ---> 时序差分方法
+- λ-retrun用来优化近似方法中的误差
+- 有效跟踪(eligibility traces)用来优化近似方法中的价值函数的微分
+- 预测方法是求状态价值方法v(s)或者v^(s,θ)
+- 控制方法是求行动价值方法q(s,a)或者q^(s,a,θ)
+- 策略梯度方法(policy gradient methods)是求策略方法π(a|s,θ)
 
-	那么动作A就是所有股票的买卖组成的向量。
-	状况Q就是动作A发生后所有股票的描述状态。
-	R就是动作A执行后总金额与上一动作后的总金额差值。
+	在第t步agent的工作流程是执行一个动作at，获得该动作之后的环境观测状况st，以及获得这个动作的反馈奖赏rt。然后不断累积反馈奖赏且最大化。
 
 	机器人agent的组成：
 	由三部分组成Policy，Value function和Model，并不是必须同时存在。
@@ -54,6 +144,59 @@ Model-free 中, 机器人只能按部就班, 一步一步等待真实世界的�
 
 最典型的在线学习就是 sarsa 了, 还有一种优化 sarsa 的算法, 叫做 sarsa lambda, 最典型的离线学习就是 Q learning, 后来人也根据离线学习的属性, 开发了更强大的算法, 比如让计算机学会玩电动的 Deep-Q-Network.
 
+## Multi-arm Bandits
+
+### 什么是多臂老虎机？
+
+多臂老虎机是指一类问题，该类问题重复的从k个行为action中选择一个，并获得一个奖励reward，一次选择的时间周期是一个时间步长（time-step）。当选择并执行完一个action后，得到一个reward，我们称reward的期望为这个action的真实值value。
+
+	q*(a) = E[Rt | At=a]
+
+如果知道每个行为的真实值，那么多臂老虎机的问题就很容易解决，但是大多数情况下，我们是不知道行为的具体值的，因此只能做近似：q^(a) ≈ q*(a)
+
+在时刻t，利用已有的知识（即行为的估计值）进行action的最优选择，这种操作称为exploit，如果不选择当前的最优行为，我们称之为explore，explore操作能够提高对行为值估计的准确度。exploit操作能够最大化当前步的奖励，但explore操作可能会使得长期的奖励更大。也就是说explore一下，说不定会有大的惊喜。如果平衡exploit操作和explore操作是强化学习中的一个重要问题（exploitation-exploration dilemma）。
+
+### 估计行为值的方法
+
+对行为值的估计是为了更好的选择行为，行为的值为每次执行该行为所得奖励的期望，因此可以用t时刻前行为已得到的奖励作为行为值的估计
+
+	q^t(a) = t时刻前a的reward之和 / t时刻前a的出现总数
+
+上面这种方法是**样本平均（sample-average）法**，在t时刻选择行为时，使用贪心策略来选择行为值最大的行为，即：
+
+	At = argamaxq^t(a)
+
+**greedy法**有一个缺陷，制作exploit操作，而不做explore操作，选择行为时可能会漏掉那些真实值更大的行为（惊喜）。改进就是**ϵ-greedy方法**
+
+如果行为的奖励恒定不变的话，样本平均法就能解决问题，但这种情况显然不多，大多数情况下行为的奖励是服从某个分布的，甚至是非平稳（nonstationary）问题，其中行为的真实值会发生变化，显然在这种情况下ϵ-greedy方法比样本均值法能获得更好的效果。
+
+采用增量式的行为估计值：
+
+![](http://s16.sinaimg.cn/middle/002RSgYjzy7erkMu2yXcf&690)
+
+Ri是第i次执行该行为后所得到的奖励。并不会浪费空间和时间来每次都直接计算Qn.
+
+上面公式的更新方式可以总结如下：
+
+	新估计值 <- 旧估计值 + 步长 * (目标值 - 旧估计值)
+
+其中（目标值 - 旧估计值）为误差（error）
+
+### 初始值
+
+对于平稳问题，前面两个方法在使用中有一个小技巧，就是提高初始值的大小。通过提高初始的行为估计值，可以有效的促进explore操作。比如，假设多臂赌博机的行为值服从期望为0，方差为1的正态分布，那么我们可以将初始的行为估计值设为5，当系统选择一个行为开始执行后，所获得的奖励很可能比5小，因此接下来就会尝试其他估计值为5的行为。这样在估计值收敛前，所有的行为都已经被执行了一遍或多遍。 
+
+通过设置较高的初始值是一种解决平稳问题的有效方法，但对于非平稳问题就没有那么好的效果。因为非平稳问题的真实行为值会发生变化
+
+### 置信上界行为选择
+
+ϵ-greedy方法能够迫使agent执行explore操作，但存在一个问题，即进行explore操作时，如何选择那些不具有最高估计值的行为。一种思路是同时考虑行为的估计值与最大行为估计值的差距以及估计过程中的不确定性。用公式表示为： 
+
+![](http://s15.sinaimg.cn/middle/002RSgYjzy7erkMu1Ii0e&690)
+
+其中Nt(a) 表示在t 时刻前行为a 被执行的次数，Nt(a) 越大说明行为a 的估计值被更新的次数越多。如果Nt(a)=0 则认为行为a 首先被执行。 
+上述在explore操作中选择行为的思路称为**置信上界（upper confidence bound, UCB）**，根号中的部分表示估计过程中的不确定性，因为估计的次数越少就代表不确定性越高，之所以采用t 的自然对数是为了减小根号内部分的增长速度。这种思路会使所有的行为都被执行过。UCB方法在实际使用的过程中也取得了很好的效果，但相比与ϵ−greedy方法扩展性较差，而且不易应用到非平稳问题中。
+
 ## 马尔科夫决策过程
 
 	马尔可夫链/过程，具有markov性质的随机状态序列。
@@ -72,19 +215,39 @@ Model-free 中, 机器人只能按部就班, 一步一步等待真实世界的�
 
 	马尔科夫决策过程（MDP），MRP将所有随机序列都遍历，而MDP是选择性遍历某些情况。
 
-![](http://s8.sinaimg.cn/small/002RSgYjzy7dlTjUYAv17&690)
+![](http://s8.sinaimg.cn/middle/002RSgYjzy7dlTjUYAv17&690)
 整个马尔科夫决策过程下来，得到最大的回报价值
 
-![](http://s16.sinaimg.cn/small/002RSgYjzy7dlTjUXSL7f&690)
+![](http://s16.sinaimg.cn/middle/002RSgYjzy7dlTjUXSL7f&690)
 当选择一个action之后，转移到不同状态下之后获取的reward之和是多少
 
-![](http://s13.sinaimg.cn/small/002RSgYjzy7dlTjUYcA4c&690)
+![](http://s13.sinaimg.cn/middle/002RSgYjzy7dlTjUYcA4c&690)
 最优状态函数
 
-![](http://s7.sinaimg.cn/small/002RSgYjzy7dlTjUXnU06&690)
+![](http://s7.sinaimg.cn/middle/002RSgYjzy7dlTjUXnU06&690)
 最优动作值函数，如果知道了最优动作值函数，也就知道了在每一步选择过程中应该选择什么样的动作。Bellman优化方程，不是一个线性等式，通过值迭代，策略迭代，Q-learning，Sarsa等方式求解。
 
 MDP需要解决的并不是每一步到底会获得多少累计reward，而是找到一个最优的解决方案。上面两个方程是存在这样的关系的，max最优动作函数就能得到最大回报价值。
+
+
+## 动态规划（Dynamic Programming）
+
+动态规划是计算最优策略的一组算法
+
+所谓最优策略就是取得最大的长期奖赏的策略
+
+对策略进行价值计算，有两种计算方式，一种是策略的状态价值计算，一种是策略的行动价值计算，前者有利于发现哪个状态价值高，找到最优状态。后者有利于发现特定状态下哪个行动的价值高，找到最优行动。
+
+### 通用策略迭代（Generalized Policy Iteration）
+
+- 先从一个策略π0开始
+- 策略评估（policy evaluation）得到策略π0的价值V0
+- 策略改善（policy improvement）根据V0，优化策略π0
+- 迭代上面的2，3步，直到找到最优价值V*，因此得到最优策略π*
+
+通用策略迭代（GPI）的通用思想是：两个循环交互的过程，迭代价值方法（value function）和迭代优化策略方法。
+
+动态规划（DP）对复杂的问题来说，可能不具有可行性，主要原因是问题状态的数量很大，导致计算代价太大。
 
 
 ## 动态规划解决MDP的Planning问题
@@ -112,6 +275,9 @@ MDP需要解决的并不是每一步到底会获得多少累计reward，而是�
 		- Policy Evaluation：基于当前的Policy计算出每个状态的value function
 		- Policy Improvment：基于当前的value function，采用贪心算法来找到当前最优的Policy
 
+	上面两步不断迭代构成一个序列，这个序列一定会在有限步数的迭代之后收敛到一个optimal policy，并得到一个optimal value function。这种寻找optimal policy的方法称之为policy iteration。
+	
+	Policy Iteration的一个弊端是它需要每一轮迭代都涉及到policy evaluation，而这本身又需要扫遍整个状态集的耗时迭代计算过程。
 	
 	-Value Iteration
 	
@@ -120,6 +286,180 @@ MDP需要解决的并不是每一步到底会获得多少累计reward，而是�
 	针对prediction，目标是在已知的policy下得到收敛的value function，因此针对问题的value iteration就够了。但是如果是control，则需要同时获得最优的policy，
 	那么在iterative policy evalution的基础上加如一个选择policy的过程就行了，
 	虽然在value itreation在迭代的过程中没有显式计算出policy，但是在得到最优的value function之后就能够推导出最优的policy，因此能够解决control问题。
+
+DP的不足之处，就是在每一轮迭代时，会涉及到整个状态集，如果状态集非常大，那么即便是一轮简单的迭代，也会有高昂的开销。
+
+##### Asynchronous Dynamic Programming
+
+	vk+1(s) ≈ maxE[Rt+1 + γvk(St+1) | St=s,At=a]
+
+Asynchronous DP不完整地遍历每个state作为一轮迭代，它每一次任意地选择一个state然后根据上面Value Iteration的主要公式更新它的value function。也就是说Asynchronous DP更灵活，它可以按任意次序迭代地更新state。Asynchronous DP的优势在于，它可以加速收敛的速度，因为它可以有意识地挑选收敛更快的state进行更新，另外，它也很适合于实时交互的场景，它可以在有限时间内给出一个较优的policy。
+
+##### Generalized Policy Iteration
+
+Policy Iteration由两步构成，一步是通过当前policy计算相应的value function，一步是根据当前的value function改进policy。在policy iteration中，这两个步骤交替进行，必须在对方完成后开始进行。在value iteration中，我们看到两个步骤交替进行是没有必要的，policy evaluation可以在改进policy的同时进行。而Asynchronous DP方法更是将policy evaluation和policy improvement的交替执行划分到更细的粒度。无论如何，最终的结果都是收敛到optimal value function和optimal policy。
+
+generalized policy iteration（GPI）来描述让policy evaluation和policy improvement相互交互的想法，与具体的粒度无关。
+
+![](http://img.blog.csdn.net/20170329153401442?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvaHViaW4wMHN4/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
+
+在GPI中，evaluation和improvement之间的关系可以看作是竞争和合作的关系，它们朝两个相反的方向相互竞争，根据value function改进的policy会使得在新policy下原来的value function不再是最优的，而根据policy计算得到的value function会使得当前的policy不再是最优的，他们是相互竞争的，但它们最终会收敛到到同一点，因此也是相互合作的。
+
+##### Summary
+
+对于大规模的问题，DP并不实用，但是相比较其他解MDP的方法，DP实际上还是相当高效的。如果我们不考虑一些技术上的细节，DP寻找以恶搞optimal policy的最坏时间，是关于state和action的数量的多项式。假设n和k是states和actions的数量，尽管可能的policies的数量是指数k**n的，但DP的时间复杂度是n和k的多项式时间。
+
+线性规划方法（linear Programming methods）也可以用来解MDP，而且在一些实例上，他们的时间复杂度要优于DP，但是线性规划的方法在states数量增加的时候变得不切实际，因此在较大规模的问题上DP更合适。
+
+但DP也会有不适用的时候，主要是因为维度灾难（curse of dimensionality）。实际上，states的个数与state变量的个数是成指数关系的，state变量相当于维数，每扩展一维，states的数量就呈指数增长。然而，DP比直接暴力搜索和线性规划方法更适合处理state空间大的问题。
+
+在实际应用中，使用现在的计算机，DP可以解百万数量级states的MDP问题，在较大state空间的问题下，我们更加倾向使用Asynchronous DP，对于synchronous DP，一轮计算都需要在每一个state上消耗计算和存储，对于有些问题，可能即使是一轮的空间和时间开销都是无法满足的。但这些问题依然有可解的可能性，因为实际上只有相对较少的states会出现在optimal solution的轨迹上。synchronous DP或者GPI的一些其他变体可以在这些问题上应用，会比synchronous方法更快地得到一个较优或最优policy。
+
+## 蒙特卡洛
+
+蒙特卡洛方法的整体思想就是：模拟 -> 抽样 -> 估值
+
+下面是强化学习中蒙特卡洛方法的一个迭代过程：
+
+	- 策略评估迭代
+		- 探索，选择一个状态和一个动作（s,a）
+		- 模拟，使用当前策略π，进行一次模拟，从当前状态(s,a)到结束，随机产生一段情节（episode）
+		- 抽样，获得这段情节上的每个状态(s,a)的回报R(s,a),记录R(s,a)到集合Returns(s,a)
+		- 抽样，q(s,a) = Returns(s,a)的平均值
+	- 策略优化,使用新的行动价值q(s,a)优化策略π(s)
+
+
+上面的蒙特卡洛方法，其中模拟过程是会模拟到结束，需要大量的迭代，才能正确找到最优策略。
+
+exploring start假设，有一个探索起点的环境。比如围棋的当前状态就是一个探索起点，而自动驾驶也许是一个没有起点的例子
+
+first-visit：在一段episode中，一个状态只出现一次，或者只需计算第一次的价值
+
+every-visit：在一段episode中，一个状态可能会被访问多次，需要计算每一次的价值
+
+on-policy method：评估和优化的策略和模拟的策略是同一个
+
+off-policy method：评估和优化的策略和模拟的策略是不同的两个。有时候，模拟数据来源于其他处，比如已有的数据，或者人工模拟等。
+
+target policy：目标策略，off policy method中，需要优化的策略。
+
+behavior policy：行为策略，off policy method中，模拟数据来源的策略。
+
+根据上面的不同情境，在强化学习中，提供了不通的蒙特卡洛方法：
+
+- 蒙特卡洛（exploring starts）方法
+- on-policy first-visit蒙特卡洛方法
+- off-policy every-visit蒙特卡洛方法
+
+### 蒙特卡洛方法和动态规划的区别
+
+1.动态规划是基于模型的，而蒙特卡洛方法是无模型的
+
+	基于模型（model-base）还是无模型（model-free）的区别就是看（状态或者行动）价值（G,v(s),q(s,a)）是如何获得的
+	
+	如果是已知，根据已知的数据计算出来的，就是基于模型的
+	如果是取样得到的，试验得到的就是无模型的
+
+2.动态规划方法的计算是引导性的（bootstarpping），而蒙特卡洛方法的计算是取样性的（sampling）
+
+	从计算状态价值V(s),q(s,a)的过程来看，动态规划是从初始状态开始，一次计算一步可能发生的所有状态价值，然后迭代计算下一步的所有状态价值。这就是引导性。
+
+	蒙特卡洛方法是从初始状态开始，通过在实际环境中模拟，得到一段episode，比如结束是失败，这段episode上的状态节点本次价值都为0，如果成功了，本次价值都为1。
+
+	
+### 蒙特卡洛方法的优势
+
+- 蒙特卡洛方法可以从交互中直接学习优化的策略，而不需要一个环境的动态模型。所谓环境的动态模型，就是表示环境的状态变化是可以完全推导的，表明要了解环境的所有知识。而蒙特卡洛可以计算V(s),q(s,a)不需要了解所有状态变化的可能性，只需要一些取样就可以。
+
+- 蒙特卡洛方法可以用于模拟模型。
+
+- 蒙特卡洛方法可以只考虑一个小的状态子集。
+
+- 蒙特卡洛的每个状态价值计算是独立的，不会影响其他的状态价值。
+
+### 蒙特卡洛方法的劣势
+
+- 需要大量的探索（模拟）
+- 基于概率的，不是确定性的
+	
+
+## 时序差分学习（Temporal-Difference Learning）
+
+时序差分学习结合了动态规划和蒙特卡洛方法
+
+- 蒙特卡洛的方法是模拟（or经历）一段episode，在episode结束后，根据episode上各个状态的价值来估计状态价值。
+- 时序差分的方法是模拟（or经历）一段episode，每行动一步（or几步），根据新状态的价值，然后估计执行前的状态价值。
+- 简单认为就是蒙特卡洛是最大步数的时序差分学习。
+
+如果可以计算出策略价值V(s),或者行动价值q(s,a),就可以优化策略π，在蒙特卡洛方法中，计算策略的价值，需要完成一个episode，通过情节的目标价值Gt来计算状态的价值
+
+	V(St) <- V(St) + αδt
+	δt = [Gt - V(St)]
+	where
+	δt  - Monte Carlo error
+	α   - learning step size
+
+时序差分的思想是通过下一个状态的价值计算状态的价值，形成一个迭代公式：
+
+	V(St) <- V(St) + αδt
+	δt = [Rt+1  + γV(St+1) - V(St)]
+	where
+	δt  - TD error
+	α   - learning step size
+	γ   - reward discount rate
+
+- 单步时序差分学习方法TD(0)
+
+![](http://s13.sinaimg.cn/middle/002RSgYjzy7eerawjWk2c&690)
+
+- 多步时序差分学习方法
+
+![](http://s16.sinaimg.cn/middle/002RSgYjzy7eeraF8p9af&690)
+
+
+## 规划型方法和学习型方法（Planning and Learning with Tabular Methods）
+
+observation的model，agent通过model来预测action的反应。
+
+对于随机的observation，有两种不同的model：
+
+- distribution model，分布式模型，返回行为的各种可能和其概率，不连续的action值。
+- sample model，样本式模型，根据概率，返回行为的一种可能。
+	
+	其数学表达：(R,S') = model(S,A)
+
+两种model的学习方法：
+
+- planning methods 规划型方法，通过模型来获得价值信息（行动状态转换，奖赏等）。比如动态规划（dynamic programming）和启发式查询（heuristic search）。
+
+- learning methods 学习型方法，通过体验（experience）来获得价值信息。比如蒙特卡洛方法（Mento Carlo method）和时序差分方法（temporal different method）。
+
+规划型方法和学习型方法都是通过计算策略价值来优化策略。因此，可以融合到一起。
+
+#### Dyna 结合模型学习和直接强化学习
+
+- model learning 模型学习，通过体验来优化模型的过程
+- directly reinforcement learning 直接强化学习，通过体验来优化策略的过程
+
+### Tabular Dyna-Q
+
+	Initialize Q(s,a) and Model(s,a) under conditons of s∈S and a∈A(s)
+	Do forever(for each episode):
+		(a) S <- current(nonterminal) state
+		(b) A <-  ε-greedy(S,Q)
+		(c) Execute action A;observe resultant reward,R,and state,S’
+		(d) Q(S,A) <- Q(S,A) + α[R+γmaxQ(S’,a)-Q(S,A)]
+		(e) Model(S,A) <- R,S’ (assuming deterministic environment)
+		(f) Repeat n times:
+			S <- random previously observed state
+			A <- random action previously taken in S
+			R,S’ <- Model(S,A)
+			Q(S,A) <- Q(S,A) + α[R+γmaxQ(S’,a)-Q(S,A)]
+
+上面的算法，如果n=0，就是Q-Learning。Dyna-Q的算法的优势在于性能上的提高。主要原因是通过建立model，减少了(c)的操作，模型学习到了Model(S,A) <- R,S'
+
+### Prioritized Sweeping
+提供了一种性能上的优化算法，只评估那些误差大于一定值θ的策略价值。
 
 
 ## Model-Free Learning（解决未知Environment下的Prediction问题）
@@ -159,6 +499,50 @@ MDP需要解决的并不是每一步到底会获得多少累计reward，而是�
 ![](http://7xkmdr.com1.z0.glb.clouddn.com/rl4_4.png)
 
 
+## on-policy 预测的近似方法
+
+找到一个对策略的状态价值通用的的近似预测方法V^(s,θ)
+
+如何判断这种近似方法好不好呢？
+
+价值均方误差(Mean Squared Value Error)
+
+![](http://s6.sinaimg.cn/middle/002RSgYjzy7eexcnSlL85&690)
+
+如何求θ呢？一个常见的方法就是通过梯度递减的方法，迭代求解θ
+
+- 随即梯度递减方法（Stochastic gradient descend method）
+
+	这个方法可以在多次迭代后，让θ最优
+
+- 蒙特卡洛
+
+![](http://s7.sinaimg.cn/middle/002RSgYjzy7eexW5j9456&690)
+
+- 半梯度递减方法（Semi-gradient method）
+	
+	TD(0)和n-steps TD计算价值的公式不是精确的，而蒙特卡洛方法是精确的。
+
+![](http://s7.sinaimg.cn/middle/002RSgYjzy7eexW5rM2e6&690)
+
+
+## on-policy控制的近似方法
+
+近似控制方法（Control Methods）是求策略的行动状态价值q(s,a)的近似值q^(s,a,θ)
+
+- 半梯度递减的控制Sarsa方法（Episode Semi-gradient Sarsa for Control）
+- 多步半梯度递减的控制Sarsa方法(n-step Semi-gradient Sarsa for Control)
+- 半梯度递减Sarsa的平均奖赏版(for continuing tasks)
+- 多步半梯度递减的控制Sarsa方法 - 平均奖赏版(for continuing tasks)
+
+## off-policy的近似方法
+
+off-policy的近似方法的研究处于领域的前沿，主要有两个方向：
+
+- 使用重要样本的方法，扭曲样本的分布成为目标策略的分布。这样就可以使用半梯度递减方法收敛。
+- 开发一个真正的梯度递减方法，这个方法不依赖于任何分布。
+
+
 ## Model-Free Control（解决未知Environment下的Control问题）
 
 	解决未知policy情况下未知Environment的MDP问题，也就是Model-Free Control问题，这是最常见的强化学习问题。
@@ -174,7 +558,7 @@ MDP需要解决的并不是每一步到底会获得多少累计reward，而是�
 	但未知environment没有状态转移矩阵，因此只能通过最大化动作价值函数来更新policy，由于improvement的过程需要动作值函数，那么在policy evaluation
 	的过程中针对给定的policy需要计算的回报价值函数V(s)也替换成动作值函数Q(s,a)。
 		
-![](http://s11.sinaimg.cn/small/002RSgYjzy7dm7BYFtg4a&690)
+![](http://s11.sinaimg.cn/middle/002RSgYjzy7dm7BYFtg4a&690)
 	
 	-Sarsa Algorithm
 		
@@ -188,8 +572,7 @@ MDP需要解决的并不是每一步到底会获得多少累计reward，而是�
 		- ====执行一个动作A，得到反馈的immediate reward为R，和新的装填S'
 		- ====基于当前策略Q和状体S'选择一个新动作A'
 		- ====更新策略：
-![](http://s11.sinaimg.cn/small/002RSgYjzy7dm7BYFtg4a&690)
-		
+			Q(S,A) = Q(S,A)+α(R+γQ(S',A')-Q(S,A))
 		- ====更新状态S=S'
 		- ==直到S到达终止状态
 
@@ -203,7 +586,7 @@ MDP需要解决的并不是每一步到底会获得多少累计reward，而是�
 	同样的Off-Policy TD也是改变了更新值函数公式，改变的这一项相当于给TD target加权，这个权重代表了目标策略和已知策略匹配程度，代表了是否能够信任目标
 	policy提出的这个action。
 
-![](http://s7.sinaimg.cn/small/002RSgYjzy7dm8KD1I256&690)
+![](http://s7.sinaimg.cn/middle/002RSgYjzy7dm8KD1I256&690)
 		
 	-Off-Policy Q-Learning
 	针对未知policy，Off-Policy的解决方案是Q-Learning，更新动作值函数。在某个已知策略下选择了下一个时刻的动作At+1，以及下一个时刻的状态St+1和奖赏Rt+1,
@@ -246,6 +629,40 @@ Q现实用之前在Q larning中的Q现实来代替。还需要一个Q估计来�
 	而预测Q现实的神经网络使用的参数则是很久以前的。
 
 
+##  策略梯度方法（Policy Gradient Methods）
+
+In  policy graident methods,the policy can be parameterized in any way ,as long as π(a|s,θ) is differentiable with respect to its parameters,that is ,as long as ▽π(a|s,θ) exists and is always finite.
+
+Polocy-based methods also offer useful ways of dealing with continuous action spaces.
+
+
+#### 策略梯度方法的新思路
+
+![](http://s9.sinaimg.cn/middle/002RSgYjzy7efJOHtzie8&690)
+
+π(a|s,θ)其输出的是在状态s下，选择动作a的概率
+
+#### 策略梯度定理 （The policy gradient theorem）
+
+情节性任务
+
+如何计算策略的价值η
+
+		η(θ) ≈ vπθ(s0)
+		where 
+		η the performance measure
+		vπθ the true function for πθ，the policy determined by θ
+		s0 some particular state
+		
+			- 策略梯度定理
+			▽η(θ) = Σdπ(s)Σqπ(s,a)▽θπ(a|s,θ)
+			where
+			d(s)  on-policy distribution,the fraction of time spent in s under the target policy π
+			Σd(s) = 1
+			
+			dπ(s) is defined to be the expected number of time steps t on which St=s in a randomly generated episode starting in s0 and following π and the dynamics of the MDP.
+
+
 ## Policy Gradient
 
 	将policy看成某个参数θ的函数，即将policy形式变成状态和动作的概率分布函数，在policy函数可微的情况下能够通过对参数求导来优化policy。
@@ -265,20 +682,105 @@ Q现实用之前在Q larning中的Q现实来代替。还需要一个Q估计来�
 	Policy gradient最大的一个优势就是：输出的action可以是一个连续的值，value-based方法输出的都是不连续的值，然后再选择值最大的action。
 	而policy gradient可以在一个连续分布上选取action。
 
-##### Monte-Carlo Policy Gradient
+##### REINFORCE:Monte-Carlo Policy Gradient
 
-	目标是优化reward，也就是优化值函数，只是这里θ不是值函数的参数，而是policy的参数，如果目标函数对参数求导，得到policy的gradient的形式为：
+The policy gradient theorem gives us an exact expression for this gradient,all we need is some way of sampling whose expectation equals of approximates this expression.
 
-![](http://s4.sinaimg.cn/small/002RSgYjzy7dpknZ1R1a3&690)	
+策略价值计算公式
+
+![](http://s9.sinaimg.cn/middle/002RSgYjzy7enGgEgHef8&690)
+
+Update Rule公式
+
+![](http://s13.sinaimg.cn/middle/002RSgYjzy7enGgEhmAfc&690)
+
+目标是优化reward，也就是优化值函数，只是这里θ不是值函数的参数，而是policy的参数，如果目标函数对参数求导，得到policy的gradient的形式为：
+
+![](http://s4.sinaimg.cn/middle/002RSgYjzy7dpknZ1R1a3&690)	
 	
-	第一项是衡量policy朝当前选择（某个状态+某个动作）偏移的程度，第二项衡量了当前选择的好坏。
+第一项是衡量policy朝当前选择（某个状态+某个动作）偏移的程度，第二项衡量了当前选择的好坏。
 
-	从而推导出Monte-Carlo Policy Gradient的形式，首先更新参数的方法是随机梯度下降+policy gradient，gradient中的动作值函数取值用执行过程中的return来代替。
+从而推导出Monte-Carlo Policy Gradient的形式，首先更新参数的方法是随机梯度下降+policy gradient，gradient中的动作值函数取值用执行过程中的return来代替。
+
+作为一个随机梯度方法，REINFORCE有比较好的理论上的收敛性质。the expected update over an episode is in the same direction as the performance graident.this assures an improvement in expected performance for sufficiently small α,and vonvergence to a local optimum under standard stochastic approximation conditions for decreasing α.However, as a Monte-Carlo method REINFORCE may be of high variance and thus slow to learn.
+
+##### REINFORCE with baseline:Monte-Carlo Policy Gradient
+
+The policy gradient theorem can be generalized to include a comparison of the action value to an arbitrary baselien b(s).The baseline can be any function ,even a random variable,as long as it does not vary with a;the equation remains ture,because the subtracted quanlity is zero.
+
+after we convert the policy gradient theorem to an expectation and an update rule,using the same steps as in the previous section,then the baseline can have a significant effect on the variance of the update rule.
+
+For MDPs the baseline should vary with state.In some states all actions have high values and we need a high baseline to differentiate the higher valued actions form the less highly valued ones;in other states all actions will have low values and a low baseline si appropriate.
+
+策略价值计算公式
+
+![](http://s15.sinaimg.cn/middle/002RSgYjzy7enHCYVRkae&690)
+
+Update Rule公式
+
+![](http://s5.sinaimg.cn/middle/002RSgYjzy7enHCYT88b4&690)
+
+## Actor-Critic
+
+Methods that learn approximations to both policy and value functions are often called actor-critic methods,where actor is a reference to the learned policy,and cirtic refers to the learned value function,usually a state-value function.
+
+此算法实际上是：
+
+- 带baseline的蒙特卡洛策略梯度强化算法的TD通用化
+- 加上有效跟踪（eligibility traces）
+
+	*蒙特卡洛方法要求必须完成当前的episode，这样才能计算正确的回报Gt*
+	
+	*TD避免了这个条件（从而提高了效率），可以通过临时差分计算一个近似的回报Gt(0)≈Gt,当然也没那么精确*
+	
+	*有效跟踪(eligibility traces)优化了(计算权重变量的)价值函数的微分值 et ≈ ▽v^(St,θt) + γλet-1*
+
+Although the REINFORCE-with-baseline method learns both a policy and a state-value function,we do not consider it to be an actor-critic method because its state-value function is used only as a baseline,not as a critic.That is,it is not used for bootstrapping(updating a state from the estimated values onf subsequent states),but only as a baseline for the state being updated.
+
+As we hvae seen,the bias introduced through bootstrapping and reliance on the state representation is often on balance beneficial because it reduces variance and accelerates learning.REINFORCE with-baseline is unbiased and will converge asymptotically to a local minimum,but like all Monte-Carlo methods it tends to be slow to learn(of high variance) and inconvenient to implement online or for continuing problems.
+
+With temporal-difference methods we can eliminate these inconveniences and through multi-step mehtods we can flexibly choose the degree of bootstrapping.In order to gain these advantages in the case of policy gradient methods we use actor-critic methods with a true bootstrapping critic.
+
+
+Update Rule公式
+
+![](http://s6.sinaimg.cn/middle/002RSgYjzy7enS6acQJ05&690)
+
+
+Upate Rule with eligibility traces公式
+
+![](http://s9.sinaimg.cn/middle/002RSgYjzy7enS6aikU68&690)
+
 
 ##### Actor-Critic Policy Gradient
 
 	Monte-Carlo Policy Gradient是用episode中反馈的return当作是动作值函数的采样，如果采用value fcuntion approximation的方法，即迭代更新policy又更新值函数。
 
+
+##### Policy Gradient for Continuing Problems
+
+For continuing problems without episode boundaries we need to define performance in terms of the average rate of reward per time step.
+
+策略价值计算公式
+对于连续性任务的策略价值是每个步骤的平均奖赏
+
+![](http://s15.sinaimg.cn/middle/002RSgYjzy7enVqiS50be&690)
+
+Update Rule公式
+
+![](http://s16.sinaimg.cn/middle/002RSgYjzy7enVqiVeT2f&690)
+
+Update Rule Actor-Critic with eligibility traces(contunuing)公式
+
+![](http://s2.sinaimg.cn/middle/002RSgYjzy7enVqiXPr11&690)
+
+###### Summary
+
+Parameterized policy methods also have an important theoretical advantage over action-value methods in the form of the form of the policy gradient theorem,which gives an exact formula for how performance is affected by the policy parameter that does not involve derivatives of the state distribution.This theorem provides a theoretical foundation for all policy gradient methods.
+
+The REINFORCE method follows directly from the policy gradient theorem.Adding a state-value function as a baseline reduces REINFORCE's variance without introducing bias.Using the state-value function for bootstrapping results introduces bias,but is often desirable for the same reason that bootstrapping TD methods are often superior to Monte Carlo methods(substantially reduced variance).The state-value function assigns credit to the policy's action selections,and accordingly the former is termed the critic and the latter the actor,and these overall methods are sometimes termed actor-critic methods.
+
+Overall,policy-gradient methods provides a significantly different set of proclicities,strengths,and weaknesses than action-value methods.
 
 ## Integrating Learning and Planning（对Environment建立模型）
 
@@ -341,7 +843,40 @@ Q现实用之前在Q larning中的Q现实来代替。还需要一个Q估计来�
 
 
 
+## 有效跟踪（Eligibility Traces）
 
-	
+别人翻译成资格迹，反正都是不好理解的东西，在数学上，其就是一个向量，称为eligibility trace vector
 
-	
+强化学习就是找最优策略π
+
+最优策略等价于最优行动π(s)
+
+最优行动可以由最优状态价值v(s)或者最优行动价值q(s,a)决定
+
+强化学习可以简单理解成求这个v(s)和q(s,a)
+
+在近似方法中V(s)或者q(s,a)表示为近似预测函数v^(s,θ)或者近似控制函数q^(s,a,θ）
+
+求近似预测函数V*(s,θ),就是求解权重向量θ
+
+求权重向量θ是通过梯度下降的方法，比如：
+
+	δt = Gt - V^(St,θt)
+	θt+1 = θt + αδt*▽(v^(St,θt))
+
+α，Gt，▽v^(St,θt)，每个都有自己的优化方法。
+
+其中▽(v^(St,θt)可以通过有效跟踪来优化，有效跟踪就是优化后的函数微分，之所以要优化，原因在于TD算法中V^(St,θt)是不精确的，Gt也是不精确的。
+
+δt是误差，权重向量θt+1就是在θt的基础上，加上αδt*有效跟踪。
+
+#### et  
+第t步的有效跟踪向量（eligibility trace rate）
+
+有效跟踪向量是近似价值函数的优化微分值
+
+其优化的技术称为(backward view)
+
+#### On-line Forward View
+
+on-line和off-line的一个区别是off-line的数据是完整的，比如拥有一个episode的所有Return (G)。
